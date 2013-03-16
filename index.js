@@ -4,6 +4,8 @@ var Buffer = require('buffer').Buffer
   , varint = require('varint')
   , vi = varint()
 
+// we use writeUint[8|32][LE|BE] instead of indexing
+// into buffers so that we get buffer-browserify compat.
 var OFFSET_BUFFER = new Buffer(4)
   , LENGTH_BUFFER = new Buffer(4)
 
@@ -28,7 +30,7 @@ function apply_delta(delta, target) {
   len = delta.length
 
   while(idx < len) {
-    command = delta[idx++]
+    command = delta.readUInt8(idx++)
     command & 0x80 ? copy() : insert()    
   }
 
@@ -44,14 +46,14 @@ function apply_delta(delta, target) {
 
     for(var x = 0; x < 4; ++x) {
       if(command & check) {
-        OFFSET_BUFFER[3 - x] = delta[idx++]
+        OFFSET_BUFFER.writeUInt8(delta.readUInt8(idx++), 3 - x)
       }
       check <<= 1
     }
 
     for(var x = 0; x < 3; ++x) {
       if(command & check) {
-        LENGTH_BUFFER[3 - x] = delta[idx++]
+        LENGTH_BUFFER.writeUInt8(delta.readUInt8(idx++), 3 - x)
       }
       check <<= 1
     }
