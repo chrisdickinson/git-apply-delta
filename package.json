@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/chrisdickinson/git-delta-buffer.git"
+    "url": "git://github.com/chrisdickinson/git-apply-delta.git"
   },
   "keywords": [
     "git",
