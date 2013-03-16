@@ -1,6 +1,6 @@
 {
   "name": "git-apply-delta",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "apply delta buffer to target buffer",
   "main": "index.js",
   "scripts": {
