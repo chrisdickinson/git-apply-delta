@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "varint": "0.0.2",
-    "bops": "0.0.1"
+    "bops": "0.0.2"
   },
   "testling": {
     "files": [
@@ -51,6 +51,6 @@
     }
   },
   "devDependencies": {
-    "tape": "~0.3.0"
+    "tape": "~1.0.1"
   }
 }
