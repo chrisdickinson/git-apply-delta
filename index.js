@@ -1,13 +1,13 @@
 module.exports = apply_delta
 
-var Buffer = require('buffer').Buffer
+var binary = require('bops')
   , varint = require('varint')
   , vi = varint()
 
 // we use writeUint[8|32][LE|BE] instead of indexing
 // into buffers so that we get buffer-browserify compat.
-var OFFSET_BUFFER = new Buffer(4)
-  , LENGTH_BUFFER = new Buffer(4)
+var OFFSET_BUFFER = binary.create(4)
+  , LENGTH_BUFFER = binary.create(4)
 
 function apply_delta(delta, target) {
   var base_size_info = {size: null, buffer: null}
@@ -25,20 +25,20 @@ function apply_delta(delta, target) {
 
   idx =
   out_idx = 0
-  output_buffer = new Buffer(resized_size_info.size)
+  output_buffer = binary.create(resized_size_info.size)
 
   len = delta.length
 
   while(idx < len) {
-    command = delta.readUInt8(idx++)
+    command = delta[idx++]
     command & 0x80 ? copy() : insert()    
   }
 
   return output_buffer
 
   function copy() {
-    OFFSET_BUFFER.writeUInt32LE(0, 0)
-    LENGTH_BUFFER.writeUInt32LE(0, 0)
+    binary.writeUInt32LE(OFFSET_BUFFER, 0, 0)
+    binary.writeUInt32LE(LENGTH_BUFFER, 0, 0)
 
     var check = 1
       , length
@@ -46,28 +46,28 @@ function apply_delta(delta, target) {
 
     for(var x = 0; x < 4; ++x) {
       if(command & check) {
-        OFFSET_BUFFER.writeUInt8(delta.readUInt8(idx++), 3 - x)
+        OFFSET_BUFFER[3 - x] = delta[idx++]
       }
       check <<= 1
     }
 
     for(var x = 0; x < 3; ++x) {
       if(command & check) {
-        LENGTH_BUFFER.writeUInt8(delta.readUInt8(idx++), 3 - x)
+        LENGTH_BUFFER[3 - x] = delta[idx++]
       }
       check <<= 1
     }
     LENGTH_BUFFER[0] = 0
 
-    length = LENGTH_BUFFER.readUInt32BE(0) || 0x10000
-    offset = OFFSET_BUFFER.readUInt32BE(0)
+    length = binary.readUInt32BE(LENGTH_BUFFER, 0) || 0x10000
+    offset = binary.readUInt32BE(OFFSET_BUFFER, 0)
 
-    target.copy(output_buffer, out_idx, offset, offset + length)
+    binary.copy(target, output_buffer, out_idx, offset, offset + length)
     out_idx += length
   }
 
   function insert() {
-    delta.copy(output_buffer, out_idx, idx, command + idx)
+    binary.copy(delta, output_buffer, out_idx, idx, command + idx)
     idx += command
     out_idx += command
   }
@@ -84,9 +84,9 @@ function delta_header(buf, output) {
   })
 
   do {
-    vi.write(buf.readUInt8(idx++))
+    vi.write(buf[idx++])
   } while(!done)
 
   output.size = size
-  output.buffer = buf.slice(idx) 
+  output.buffer = binary.subarray(buf, idx) 
 }

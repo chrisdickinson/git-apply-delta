@@ -1,17 +1,17 @@
 var test = require('tape')
   , apply_delta = require('./index')
-  , Buffer = require('buffer').Buffer
+  , binary = require('bops')
 
 test('test apply delta to buffer', function(assert) {
-  var delta = new Buffer(fixture.delta, 'base64')
-    , base = new Buffer(fixture.base, 'base64')
+  var delta = binary.from(fixture.delta, 'base64')
+    , base = binary.from(fixture.base, 'base64')
     , expected = fixture.out
 
 
   var result = apply_delta(delta, base)
 
-  assert.equal(result.length, Buffer.byteLength(expected, 'base64'))
-  assert.equal(result.toString('base64'), expected)
+  assert.equal(result.length, binary.from(expected, 'base64').length)
+  assert.equal(binary.to(result, 'base64'), expected)
 
   assert.end()
 })
