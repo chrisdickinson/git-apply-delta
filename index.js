@@ -1,8 +1,8 @@
 module.exports = apply_delta
 
 var binary = require('bops')
-  , varint = require('varint')
-  , vi = varint()
+  , Decoder = require('varint/decode.js')
+  , vi = new Decoder
 
 // we use writeUint[8|32][LE|BE] instead of indexing
 // into buffers so that we get buffer-browserify compat.
@@ -31,7 +31,7 @@ function apply_delta(delta, target) {
 
   while(idx < len) {
     command = delta[idx++]
-    command & 0x80 ? copy() : insert()    
+    command & 0x80 ? copy() : insert()
   }
 
   return output_buffer
@@ -78,15 +78,15 @@ function delta_header(buf, output) {
     , idx = 0
     , size = 0
 
-  vi.once('data', function(s) {
+  vi.ondata = function(s) {
     size = s
     done = true
-  })
+  }
 
   do {
     vi.write(buf[idx++])
   } while(!done)
 
   output.size = size
-  output.buffer = binary.subarray(buf, idx) 
+  output.buffer = binary.subarray(buf, idx)
 }
