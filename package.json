@@ -19,7 +19,7 @@
   "author": "Chris Dickinson <chris@neversaw.us>",
   "license": "MIT",
   "dependencies": {
-    "varint": "0.0.2",
+    "varint": "0.0.3",
     "bops": "~0.0.6"
   },
   "testling": {
